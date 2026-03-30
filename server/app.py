@@ -19,6 +19,19 @@ bcrypt.init_app(app)
 migrate = Migrate(app, db)
 CORS(app)
 
+def create_starter_data(user_id):
+    hvac = System(name="HVAC Unit", user_id=user_id)
+    kitchen = System(name="Kitchen Appliances", user_id=user_id)
+    db.session.add_all([hvac, kitchen])
+    db.session.commit() 
+
+    db.session.add_all([
+        Task(name="Replace Air Filter", system_id=hvac.id, service_date="2026-04-01"),
+        Task(name="Flush Water Heater", system_id=hvac.id, service_date="2026-09-15"),
+        Task(name="Clean Refrigerator Coils", system_id=kitchen.id, service_date="2026-06-20")
+    ])
+    db.session.commit()
+
 def get_diy_advice(task_name):
     name = task_name.lower()
     smart_tips = {
@@ -44,14 +57,22 @@ def get_diy_advice(task_name):
 def signup():
     data = request.get_json()
     try:
+        # Check if user already exists
+        if User.query.filter_by(email=data.get('email')).first():
+            return make_response(jsonify({"error": "User already exists"}), 422)
+
         new_user = User(email=data.get('email'))
         new_user.password_hash = data.get('password')
         db.session.add(new_user)
         db.session.commit()
+        
+        create_starter_data(new_user.id)
+        
         session['user_id'] = new_user.id
         return make_response(jsonify(new_user.to_dict()), 201)
     except Exception as e:
-        return make_response(jsonify({"error": str(e)}), 422)
+        db.session.rollback()
+        return make_response(jsonify({"error": "Could not create account"}), 422)
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -72,7 +93,8 @@ def check_session():
     user_id = session.get('user_id')
     if user_id:
         user = User.query.get(user_id)
-        return make_response(jsonify(user.to_dict()), 200)
+        if user:
+            return make_response(jsonify(user.to_dict()), 200)
     return {}, 401
 
 @app.route('/systems', methods=['GET', 'POST'])
@@ -87,8 +109,6 @@ def handle_systems():
         search_term = request.args.get('search', '', type=str)
         
         query = System.query.filter_by(user_id=user_id)
-        
-        # New Search Logic
         if search_term:
             query = query.filter(System.name.ilike(f"%{search_term}%"))
             
@@ -120,17 +140,7 @@ def reset_app():
             db.session.delete(s)
         db.session.commit()
 
-        hvac = System(name="HVAC Unit", user_id=user_id)
-        kitchen = System(name="Kitchen Appliances", user_id=user_id)
-        db.session.add_all([hvac, kitchen])
-        db.session.commit()
-
-        db.session.add_all([
-            Task(name="Replace Air Filter", system_id=hvac.id, service_date="2026-04-01"),
-            Task(name="Flush Water Heater", system_id=hvac.id, service_date="2026-09-15"),
-            Task(name="Clean Refrigerator Coils", system_id=kitchen.id, service_date="2026-06-20")
-        ])
-        db.session.commit()
+        create_starter_data(user_id)
         
         query = System.query.filter_by(user_id=user_id)
         paginated = query.paginate(page=1, per_page=6, error_out=False)

@@ -45,7 +45,6 @@ function App() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Sync systems whenever user, page, or search term changes
   useEffect(() => {
     if (user) {
       fetch(`/systems?page=${pagination.page}&per_page=6&search=${searchTerm}`)
@@ -57,7 +56,6 @@ function App() {
     }
   }, [user, pagination.page, searchTerm])
 
-  // Reset to page 1 whenever searching to avoid empty result views
   useEffect(() => {
     setPagination(prev => ({ ...prev, page: 1 }));
   }, [searchTerm]);
@@ -105,10 +103,19 @@ function App() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: newSystemName })
-    }).then(res => res.json()).then(newSys => {
+    })
+    .then(res => res.json())
+    .then(newSys => {
       setNewSystemName("")
       toast.success(`${newSys.name} system created`);
-      setPagination(prev => ({ ...prev, page: 1 }));
+      
+      // Fetch fresh data for page 1 to show the new card immediately
+      fetch(`/systems?page=1&per_page=6&search=${searchTerm}`)
+        .then(res => res.json())
+        .then(data => {
+          setSystems(data.systems);
+          setPagination({ page: 1, totalPages: data.total_pages });
+        });
     })
   }
 
@@ -154,18 +161,17 @@ function App() {
 
   const handleDeleteSystem = (systemId) => {
     fetch(`/systems/${systemId}`, { method: 'DELETE' }).then(() => {
-      const newSystems = systems.filter(sys => sys.id !== systemId);
-      if (newSystems.length === 0 && pagination.page > 1) {
-        setPagination(prev => ({ ...prev, page: prev.page - 1 }));
-      } else {
-        // Refresh from server to pull any items from the next page into current view
-        fetch(`/systems?page=${pagination.page}&per_page=6&search=${searchTerm}`)
-          .then(res => res.json())
-          .then(data => {
+      fetch(`/systems?page=${pagination.page}&per_page=6&search=${searchTerm}`)
+        .then(res => res.json())
+        .then(data => {
+          // If current page is now empty and we aren't on page 1, go back a page
+          if (data.systems.length === 0 && pagination.page > 1) {
+            setPagination(prev => ({ ...prev, page: prev.page - 1 }));
+          } else {
             setSystems(data.systems);
             setPagination(prev => ({ ...prev, totalPages: data.total_pages }));
-          })
-      }
+          }
+        })
       toast.error("System removed");
     })
   }
@@ -186,7 +192,7 @@ function App() {
               newSystemName={newSystemName}
               setNewSystemName={setNewSystemName}
               onAddSystem={handleAddSystem}
-              filteredSystems={systems} // Now directly using state from server
+              filteredSystems={systems}
               onDeleteTask={handleDeleteTask}
               onAddTask={handleAddTask}
               onDeleteSystem={handleDeleteSystem}

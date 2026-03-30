@@ -22,14 +22,12 @@ class User(db.Model, SerializerMixin):
     email = db.Column(db.String, unique=True, nullable=False)
     _password_hash = db.Column(db.String, nullable=False)
     
-    # Relationship with cascade to clean up systems if a user is deleted
     systems = db.relationship('System', back_populates='user', cascade='all, delete-orphan')
     
     serialize_rules = ('-_password_hash', '-systems.user',)
 
     @hybrid_property
     def password_hash(self):
-        # Raising an error prevents the hash from being accidentally read/leaked
         raise AttributeError('Password hashes may not be viewed.')
 
     @password_hash.setter
@@ -49,8 +47,6 @@ class System(db.Model, SerializerMixin):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     
     user = db.relationship('User', back_populates='systems')
-    
-    # CRITICAL: This cascade ensures Tasks are wiped when the System is deleted
     tasks = db.relationship('Task', back_populates='system', cascade='all, delete-orphan')
     
     serialize_rules = ('-user', '-tasks.system',)
