@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# EcoTrack: Automated Setup and Launch Script
+# EcoTrack: Automated Setup, Launch, and Browser Open
 
 # 1. Backend Environment and Database Seed
 echo "Setting up Python Backend..."
@@ -33,6 +33,12 @@ else
     exit 1
 fi
 
+# 3. Wait and Auto-Open Browser
+echo "Waiting for servers to initialize..."
+sleep 3
+echo "Opening EcoTrack at http://localhost:5173"
+open "http://localhost:5173"
+
 # Function to kill both processes on exit
 cleanup() {
     echo ""
@@ -47,7 +53,7 @@ trap cleanup SIGINT
 echo "------------------------------------------------"
 echo "EcoTrack is now running!"
 echo "Backend: http://127.0.0.1:5555"
-echo "Frontend: Check the Vite URL above (usually http://localhost:5173)"
+echo "Frontend: http://localhost:5173"
 echo "------------------------------------------------"
 echo "Press Ctrl+C to stop both servers."
 

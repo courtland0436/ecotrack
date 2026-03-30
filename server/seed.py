@@ -11,7 +11,7 @@ def seed_database():
 
         print("Creating a test user...")
         u1 = User(email="test@example.com")
-        # Use the setter you built in your User model to hash the password!
+        # Uses your Bcrypt setter in models.py to hash correctly
         u1.password_hash = "password123" 
         db.session.add(u1)
         db.session.commit()
