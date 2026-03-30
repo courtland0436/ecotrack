@@ -4,8 +4,12 @@ __pycache__/
 *$py.class
 venv/
 .env
-instance/
 .pytest_cache/
+
+# SQLite / Database
+# Ignore all files in instance, but keep the folder via .gitkeep
+server/instance/*
+!server/instance/.gitkeep
 
 # Node / React
 node_modules/
