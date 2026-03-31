@@ -11,6 +11,7 @@ The application includes a "Smart Tips" system that provides specific DIY advice
 * **System & Task Management:** Full CRUD for household systems and associated tasks.
 * **Server-Side Pagination & Search:** Optimized data fetching across the entire database.
 * **Interactive Dashboard:** Responsive UI featuring loading states and real-time notifications.
+* **Reset App Functionality:** A dedicated "Reset App" button allows users to clear custom data and return to the default starter systems at any time.
 * **Ownership Control:** Backend authorization ensuring users can only access their own records.
 
 ---
@@ -33,21 +34,23 @@ The application includes a "Smart Tips" system that provides specific DIY advice
 
 ## Setup and Launch
 
-To install dependencies, seed the database, and launch both the frontend and backend automatically, run the following command from the root directory:
+To install dependencies and launch both the frontend and backend automatically, run the following command from the root directory:
 ```
 bash setup.sh
 ```
-### Important Notes:
-* The script will install all necessary packages and seed a test user.
-* Both servers will run within this single terminal session.
-* **To Stop:** Press **Ctrl+C** to safely shut down both the Flask and Vite processes.
+NOTES:
+1. Access the Application: The script should launch your browser automatically. If it does not, navigate to http://localhost:5173/
+2. To Stop: Press Ctrl+C to safely shut down both the Flask and Vite processes.
 
 ---
 
-## Test Credentials
-To view the pre-loaded HVAC and Kitchen cards immediately, use the following credentials:
-* **Email:** test@example.com
-* **Password:** password123
+## Authentication & Starter Data
+
+EcoTrack is designed for immediate testing. To begin:
+
+1. Click "Sign Up" on the login screen.
+2. Create an account with any email and password.
+3. Note: All new accounts are automatically provisioned with pre-loaded HVAC and Kitchen maintenance cards so you can test the dashboard features immediately.
 
 ---
 
@@ -55,10 +58,10 @@ To view the pre-loaded HVAC and Kitchen cards immediately, use the following cre
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
+| POST | /signup | Creates a new user and generates starter data |
 | POST | /login | Authenticates user and starts session |
-| GET | /check_session | Verifies current user status |
+| POST | /reset | Wipes user data and restores default HVAC/Kitchen cards |
 | GET | /systems?page=1&search= | Returns paginated systems for the user |
-| POST | /tasks | Creates a new maintenance task |
 | PATCH | /tasks/<id> | Toggles task completion and returns DIY advice |
 | DELETE | /systems/<id> | Removes a system and its associated tasks |
 
