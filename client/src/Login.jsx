@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import logo from './assets/Logo_EcoTrack.svg' 
+import logo from "./assets/EcoTrack_Logo.svg"; 
 
 function Login({ setUser }) {
   const [email, setEmail] = useState("")
