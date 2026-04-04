@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+// Import the logo asset
+import logo from '../assets/Logo_EcoTrack.svg' 
 
 function Login({ setUser }) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLogin, setIsLogin] = useState(true) 
-  const [error, setError] = useState(null) // Added error handling
+  const [error, setError] = useState(null)
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
@@ -34,6 +36,16 @@ function Login({ setUser }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-10">
+        
+        {/* Logo Section */}
+        <div className="flex justify-center mb-6">
+          <img 
+            src={logo} 
+            alt="EcoTrack Logo" 
+            className="h-16 w-auto" // Adjust h-16 to change the size
+          />
+        </div>
+
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-slate-800">
             {isLogin ? 'Welcome Back' : 'Create Account'}
